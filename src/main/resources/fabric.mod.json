@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "cc-email",
+  "version": "${version}",
+  "name": "ComputerCraft Email",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "LGPL-3.0",
+  "icon": "assets/cc-email/icon.png",
+  "environment": "server",
+  "entrypoints": {
+
+    "main": [
+      "net.irisshaders.ccEmail.CcEmail"
+    ]
+  },
+  "mixins": [
+    "cc-email.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version}"
+  }
+}
