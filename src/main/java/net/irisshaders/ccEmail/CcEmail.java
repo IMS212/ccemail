@@ -21,6 +21,7 @@ import java.util.List;
 
 public class CcEmail implements ModInitializer {
     private static HTreeMap<Integer, String> emailAddresses;
+    private static List<String> users;
     private static HTreeMap<String, Integer> emailAddressesRev;
     private static DB db;
 
@@ -66,8 +67,16 @@ public class CcEmail implements ModInitializer {
     public static void setUsername(int id, String username) throws LuaException {
         String[] parts = username.split("@");
         if (parts.length != 2) throw new LuaException("Invalid email address: " + username + " (must be in the form user@base)");
-        emailAddresses.put(id, username);
+        String oldName = emailAddresses.put(id, username);
+        if (oldName != null) {
+            String[] parts2 = oldName.split("@");
+
+            emailAddressesRev.remove(oldName);
+            users.remove(oldName);
+            getDomain(parts2[1]).remove(parts2[0]);
+        }
         emailAddressesRev.put(username, id);
+        users.add(username);
         getDomain(parts[1]).add(parts[0]);
         db.commit();
     }
@@ -92,8 +101,12 @@ public class CcEmail implements ModInitializer {
         awake.add(id);
     }
 
-    public static Collection<String> getAllUsers() {
-        return emailAddresses.values();
+    public static List<String> getAllUsers() {
+        return users;
+    }
+
+    public static void commitDB() {
+        db.commit();
     }
 
     @Override
@@ -102,6 +115,7 @@ public class CcEmail implements ModInitializer {
                 .closeOnJvmShutdown().fileMmapEnable().transactionEnable().make();
 
         emailAddresses = db.hashMap("emailAddresses", Serializer.INTEGER, Serializer.STRING).createOrOpen();
+        users = db.indexTreeList("users", Serializer.STRING).createOrOpen();
         emailAddressesRev = db.hashMap("emailAddressesRev", Serializer.STRING, Serializer.INTEGER).createOrOpen();
 
         emailId = db.atomicInteger("emailId").createOrOpen();
@@ -123,6 +137,7 @@ public class CcEmail implements ModInitializer {
     }
 
     public static List<Email> getEmails(int user) {
+
         return emails.computeIfAbsent(user, i -> {
             List<Email> l = db.indexTreeList("inbox_" + i, Email.SERIALIZER).createOrOpen();
             db.commit();

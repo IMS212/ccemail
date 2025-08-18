@@ -6,6 +6,7 @@ import org.mapdb.DataOutput2;
 import org.mapdb.Serializer;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 public class Email {
@@ -89,6 +90,14 @@ public class Email {
     @LuaFunction("markRead")
     public final void markRead() {
         hasRead = true;
+        List<Email> list = CcEmail.getEmails(getRecipientId());
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId() == getId()) {
+                list.set(i, this); // triggers re-serialization and persistence
+                CcEmail.commitDB();
+                return;
+            }
+        }
     }
 
     @Override

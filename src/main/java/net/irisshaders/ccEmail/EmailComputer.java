@@ -52,6 +52,21 @@ public class EmailComputer implements ILuaAPI {
         CcEmail.getEmails(this.id).remove(index);
     }
 
+    @LuaFunction("getUserCount")
+    public final int getUserCount() {
+        return CcEmail.getAllUsers().size();
+    }
+
+    @LuaFunction("getUserByIndex")
+    public final String getUserByIndex(int index) throws LuaException {
+        return CcEmail.getAllUsers().get(index);
+    }
+
+    @LuaFunction("userExists")
+    public final boolean getUserByIndex(String name) throws LuaException {
+        return CcEmail.getAllUsers().contains(name);
+    }
+
     @LuaFunction("sendEmail")
     public final void sendEmail(String user, String subject, String body) throws LuaException {
         String[] parts = user.split("@");
