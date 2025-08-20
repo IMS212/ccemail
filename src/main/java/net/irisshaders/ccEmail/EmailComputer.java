@@ -6,9 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class EmailComputer implements ILuaAPI {
+
     private final int id;
     private final IComputerSystem system;
 
@@ -59,7 +61,7 @@ public class EmailComputer implements ILuaAPI {
 
     @LuaFunction("getUserByIndex")
     public final String getUserByIndex(int index) throws LuaException {
-        return CcEmail.getNameFor(index);
+        return CcEmail.getCachedUserSorted()[index];
     }
 
     @LuaFunction("userExists")

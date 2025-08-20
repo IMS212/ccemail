@@ -39,6 +39,7 @@ public class CcEmail implements ModInitializer {
     private static Int2ObjectMap<List<Email>> emails = new Int2ObjectOpenHashMap<>();
     private static Object2ObjectMap<String, List<String>> domains = new Object2ObjectOpenHashMap();
     private static Atomic.Integer emailId;
+    private static String[] cachedUsersSorted;
 
     public static void registerComputer(int id, EmailComputer emailComputer) {
         computers.put(id, emailComputer);
@@ -84,6 +85,7 @@ public class CcEmail implements ModInitializer {
         users.add(username);
         getDomain(parts[1]).add(parts[0]);
         db.commit();
+        calculateCache();
     }
 
     public static List<String> getDomain(String part) {
@@ -99,7 +101,7 @@ public class CcEmail implements ModInitializer {
     }
 
     public static String getNameFor(int id) {
-        return emailAddresses.getOrDefault(id, null);
+            return emailAddresses.getOrDefault(id, null);
     }
 
     public static void markAwake(int id) {
@@ -116,6 +118,31 @@ public class CcEmail implements ModInitializer {
 
     public static boolean usernameValid(String name) {
         return name.contains("global") || emailAddressesRev.containsKey(name);
+    }
+
+    public static String[] getCachedUserSorted() {
+        if (cachedUsersSorted == null) {
+            calculateCache();
+        }
+        return cachedUsersSorted;
+    }
+
+    private static final Comparator<? super String> SORT_DOMAIN = (o1, o2) -> {
+        String o1Domain = o1.split("@")[1];
+        String o2Domain = o2.split("@")[1];
+        int domainComparison = o1Domain.compareTo(o2Domain);
+
+        if (domainComparison != 0) {
+            return domainComparison;
+        }
+
+        String o1Name = o1.split("@")[0];
+        String o2Name = o2.split("@")[0];
+        return o1Name.compareTo(o2Name);
+    };
+
+    private static void calculateCache() {
+        cachedUsersSorted = getAllUsers().stream().sorted(SORT_DOMAIN).toArray(String[]::new);
     }
 
     @Override
