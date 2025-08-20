@@ -59,12 +59,12 @@ public class EmailComputer implements ILuaAPI {
 
     @LuaFunction("getUserByIndex")
     public final String getUserByIndex(int index) throws LuaException {
-        return CcEmail.getAllUsers().get(index);
+        return CcEmail.getNameFor(index);
     }
 
     @LuaFunction("userExists")
     public final boolean getUserByIndex(String name) throws LuaException {
-        return CcEmail.getAllUsers().contains(name);
+        return CcEmail.usernameValid(name);
     }
 
     @LuaFunction("sendEmail")
