@@ -8,7 +8,7 @@ local function setRedstone(side, value)
     local g = _G or {}
     local r = rawget(g, "rs") or rawget(g, "redstone")
     if r and r.setOutput then
-        pcall(r.setOutput, side, value)
+        redstone.setAnalogOutput(side, value)
     end
 end
 
@@ -85,7 +85,7 @@ local function go(screenFn, ...)
 end
 
 local function onEmailReceived()
-    setRedstone("top", true)
+    setRedstone("top", countUnreadEmails())
 
     if CURRENT_SCREEN == "inbox" and INBOX_REFRESH then
         INBOX_REFRESH()
@@ -329,13 +329,13 @@ inboxScreen = function()
         indexMap = {}
         local n = winter_email.getEmails()
         title:setText("Inbox (" .. tostring(n) .. ")")
-        setRedstone("top", false)
+        setRedstone("top", 0)
         for i = 0, (n - 1) do
             local em = winter_email.getEmail(i)
             local unread = ""
             if not em:hasRead() then
                 unread = "(New!) "
-                setRedstone("top", true)
+                setRedstone("top", countUnreadEmails())
             end
             local senderName = "?"
             if em.getSender then
