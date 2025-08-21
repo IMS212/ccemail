@@ -87,6 +87,20 @@ end
 local function onEmailReceived()
     setRedstone("top", countUnreadEmails())
 
+    local dfpwm = require("cc.audio.dfpwm")
+    local speaker = peripheral.find("speaker")
+
+    if speaker ~= nil then
+    local decoder = dfpwm.make_decoder()
+        for chunk in io.lines("mail.dfpwm", 16 * 1024) do
+            local buffer = decoder(chunk)
+
+            while not speaker.playAudio(buffer) do
+                os.pullEvent("speaker_audio_empty")
+            end
+        end
+    end
+
     if CURRENT_SCREEN == "inbox" and INBOX_REFRESH then
         INBOX_REFRESH()
         return
